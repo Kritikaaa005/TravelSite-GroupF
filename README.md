@@ -5,7 +5,7 @@
 A travel and tourism web platform for exploring Nepal.
 
 ## Team
-- PM: Ayaush Mishra 
+- PM: Aayush Mishra 
 - BA: Melisha Thapa
 - Developer1:   Kritika Yadav
 - Developer2: Ankit Chaudhary
