@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate, useSearchParams, Link } from "react-router-dom";
+import { login } from "../services/authService";
 
 const LoginPage = () => {
   const navigate = useNavigate();
@@ -15,30 +16,31 @@ const LoginPage = () => {
     setError("");
     setLoading(true);
 
-    // TODO: replace with real API call
-    // Hardcoded demo login
-    setTimeout(() => {
-      if (form.email && form.password) {
-        const user = {
-          name: role === "admin" ? "Admin" : "Traveler",
-          email: form.email,
-          role,
-        };
-        localStorage.setItem("token", "demo-token-123");
-        localStorage.setItem("user", JSON.stringify(user));
-        navigate(role === "admin" ? "/admin" : "/home");
-      } else {
-        setError("Invalid email or password");
+    try {
+      const user = await login(form.email, form.password);
+
+      
+      if (user.role !== role) {
+        setError(role === "admin" ? "This account is not an admin." : "Please use the admin login.");
+        setLoading(false);
+        return;
       }
+
+      navigate(user.role === "admin" ? "/admin" : "/home");
+
+    } catch (err) {
+      setError(err.message === "Failed to fetch"
+        ? "Cannot connect to server. Make sure XAMPP is running."
+        : err.message
+      );
       setLoading(false);
-    }, 800);
+    }
   };
 
   return (
     <div className="min-h-screen flex items-center justify-center relative overflow-hidden"
       style={{ backgroundColor: "#0F172A" }}>
 
-      {/* Glass card */}
       <div className="relative z-10 w-full max-w-md mx-4 rounded-2xl p-10"
         style={{
           background: "rgba(255,255,255,0.08)",
@@ -47,16 +49,10 @@ const LoginPage = () => {
           border: "1px solid rgba(255,255,255,0.15)",
         }}>
 
-        {/* Logo */}
         <p className="text-white/60 text-sm mb-6 text-center">WanderNepal</p>
-
-        {/* Heading */}
         <h1 className="text-3xl font-bold text-white mb-1 text-center">Welcome Back</h1>
-        <p className="text-white/50 text-sm text-center mb-8">
-          Sign in to continue your journey
-        </p>
+        <p className="text-white/50 text-sm text-center mb-8">Sign in to continue your journey</p>
 
-        {/* Role badge */}
         <div className="flex justify-center mb-6">
           <span className="text-xs px-3 py-1 rounded-full font-medium"
             style={{ background: "rgba(16,185,129,0.2)", color: "#10B981" }}>
@@ -64,10 +60,9 @@ const LoginPage = () => {
           </span>
         </div>
 
-        {/* Form */}
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           {error && (
-            <div className="text-red-400 text-sm text-center bg-red-400/10 rounded-lg py-2">
+            <div className="text-red-400 text-sm text-center bg-red-400/10 rounded-lg py-2 border border-red-400/20">
               {error}
             </div>
           )}
@@ -81,10 +76,7 @@ const LoginPage = () => {
               onChange={(e) => setForm({ ...form, email: e.target.value })}
               required
               className="rounded-lg px-4 py-3 text-white text-sm outline-none focus:ring-2 focus:ring-emerald-500"
-              style={{
-                background: "rgba(255,255,255,0.08)",
-                border: "1px solid rgba(255,255,255,0.15)",
-              }}
+              style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.15)" }}
             />
           </div>
 
@@ -97,10 +89,7 @@ const LoginPage = () => {
               onChange={(e) => setForm({ ...form, password: e.target.value })}
               required
               className="rounded-lg px-4 py-3 text-white text-sm outline-none focus:ring-2 focus:ring-emerald-500"
-              style={{
-                background: "rgba(255,255,255,0.08)",
-                border: "1px solid rgba(255,255,255,0.15)",
-              }}
+              style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.15)" }}
             />
           </div>
 
@@ -108,13 +97,11 @@ const LoginPage = () => {
             type="submit"
             disabled={loading}
             className="mt-2 py-3 rounded-lg font-semibold text-white transition-all hover:opacity-90 active:scale-95"
-            style={{ backgroundColor: "#10B981" }}
-          >
+            style={{ backgroundColor: "#10B981" }}>
             {loading ? "Signing in..." : "Login →"}
           </button>
         </form>
 
-        {/* Register link — only for user role */}
         {role !== "admin" && (
           <p className="text-center text-white/40 text-sm mt-6">
             Don't have an account?{" "}
@@ -124,7 +111,6 @@ const LoginPage = () => {
           </p>
         )}
 
-        {/* Back link */}
         <p className="text-center mt-4">
           <Link to="/" className="text-white/30 text-xs hover:text-white/50 transition-colors">
             ← Back to home

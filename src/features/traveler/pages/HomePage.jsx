@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import Navbar from "../components/Navbar";
-import Footer from "../components/Footer";
-import { getDestinations, getPackages, reviews } from "../api";
+import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
+import { getDestinations, getPackages, reviews } from "@/api";
 
 const HomePage = () => {
   const navigate = useNavigate();
@@ -25,7 +25,7 @@ const HomePage = () => {
       <Navbar />
 
       {/* Hero */}
-      <section className="relative h-[560px] flex items-center justify-center overflow-hidden">
+      <section className="relative h-140 flex items-center justify-center overflow-hidden">
         <div className="absolute inset-0 bg-cover bg-center"
           style={{ backgroundImage: `url('https://images.unsplash.com/photo-1544735716-392fe2489ffa?w=1920&q=80')` }} />
         <div className="absolute inset-0 bg-black/50" />
@@ -61,7 +61,7 @@ const HomePage = () => {
       </section>
 
       {/* Featured Destinations - Original Card Style + Gradient BG */}
-      <section className="py-16 px-6 max-w-7xl mx-auto w-full bg-gradient-to-b from-white to-gray-50">
+      <section className="py-16 px-6 max-w-7xl mx-auto w-full bg-linear-to-b from-white to-gray-50">
         <div className="text-center mb-10">
           <h2 className="text-3xl font-bold text-gray-900">Featured Destinations</h2>
           <p className="text-gray-500 mt-2">Explore Nepal's most iconic locations</p>
@@ -73,7 +73,7 @@ const HomePage = () => {
               onClick={() => navigate(`/destinations/${dest.id}`)}>
               <img src={dest.image} alt={dest.name}
                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
+              <div className="absolute inset-0 bg-linear-to-t from-black/70 via-transparent to-transparent" />
               <div className="absolute bottom-0 left-0 right-0 p-4">
                 <h3 className="text-white font-bold text-lg">{dest.name}</h3>
                 <div className="flex items-center justify-between mt-1">
@@ -144,8 +144,8 @@ const HomePage = () => {
         </div>
       </section>
 
-      {/* Reviews - Kept: Italics + Gradient back to white */}
-      <section id="reviews" className="py-16 px-6 max-w-7xl mx-auto w-full bg-gradient-to-b from-gray-50 to-white">
+      {/* Reviews - Kept: Italics + Gradient back to white
+      <section id="reviews" className="py-16 px-6 max-w-7xl mx-auto w-full bg-linear-to-b from-gray-50 to-white">
         <div className="text-center mb-10">
           <h2 className="text-3xl font-bold text-gray-900">What Our Travelers Say</h2>
           <p className="text-gray-500 mt-2">Real experiences from real adventurers</p>
@@ -172,7 +172,7 @@ const HomePage = () => {
             </div>
           ))}
         </div>
-      </section>
+      </section> */}
 
       <Footer />
     </div>

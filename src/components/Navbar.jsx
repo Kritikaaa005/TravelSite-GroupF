@@ -30,9 +30,6 @@ const Navbar = () => {
           <Link to="/packages" className="text-sm font-medium text-white/70 hover:text-white transition-colors">
             Packages
           </Link>
-          <a href="#reviews" className="text-sm font-medium text-white/70 hover:text-white transition-colors">
-            Reviews
-          </a>
           <Link to="/dashboard" className="text-sm font-medium text-white/70 hover:text-white transition-colors">
             My Bookings
           </Link>

@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import { register } from "../services/authService";
 
 const RegisterPage = () => {
   const navigate = useNavigate();
@@ -21,20 +22,24 @@ const RegisterPage = () => {
     }
 
     setLoading(true);
-    setTimeout(() => {
-      const user = { name: form.name, email: form.email, role: "user" };
-      localStorage.setItem("token", "demo-token-123");
-      localStorage.setItem("user", JSON.stringify(user));
+
+    try {
+      await register(form.name, form.email, form.password);
       navigate("/home");
+
+    } catch (err) {
+      setError(err.message === "Failed to fetch"
+        ? "Cannot connect to server. Make sure XAMPP is running."
+        : err.message
+      );
       setLoading(false);
-    }, 800);
+    }
   };
 
   return (
     <div className="min-h-screen flex items-center justify-center relative overflow-hidden"
       style={{ backgroundColor: "#0F172A" }}>
 
-      {/* Glass card - Adjusted max-width to 'sm' and padding to '8' */}
       <div className="relative z-10 w-full max-w-sm mx-4 rounded-2xl p-8"
         style={{
           background: "rgba(255,255,255,0.08)",
@@ -110,8 +115,7 @@ const RegisterPage = () => {
             type="submit"
             disabled={loading}
             className="mt-2 py-2.5 rounded-lg font-semibold text-white transition-all hover:opacity-90 active:scale-95 text-sm"
-            style={{ backgroundColor: "#10B981" }}
-          >
+            style={{ backgroundColor: "#10B981" }}>
             {loading ? "Creating account..." : "Register →"}
           </button>
         </form>

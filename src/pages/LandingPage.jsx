@@ -19,7 +19,7 @@ export default function LandingPage() {
         </p>
 
         <div className="flex flex-col lg:flex-row gap-8 justify-center items-center">
-          {/* TRAVELER CARD - Wider & Shorter */}
+          {/* TRAVELER CARD */}
           <Link
             to="/login?role=user"
             className="group flex flex-col items-center justify-center p-8 md:p-10 bg-white/10 backdrop-blur-xl rounded-[2rem] border border-white/20 hover:bg-white/15 hover:border-white/40 transition-all duration-500 w-full md:w-[450px] min-h-[280px] shadow-2xl"
@@ -33,7 +33,7 @@ export default function LandingPage() {
             </p>
           </Link>
 
-          {/* ADMIN CARD - Wider & Shorter */}
+          {/* ADMIN CARD */}
           <Link
             to="/login?role=admin"
             className="group flex flex-col items-center justify-center p-8 md:p-10 bg-white/10 backdrop-blur-xl rounded-[2rem] border border-white/20 hover:bg-white/15 hover:border-white/40 transition-all duration-500 w-full md:w-[450px] min-h-[280px] shadow-2xl"
