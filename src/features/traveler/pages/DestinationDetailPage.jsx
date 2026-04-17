@@ -3,18 +3,32 @@ import { useParams, useNavigate } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { getDestinationById } from "../services/destinationService";
+import { getPackages } from "../services/packageService";
+
+const difficultyColor = (d) => ({
+  Easy: "#10B981", Moderate: "#F59E0B", Challenging: "#EF4444", Hard: "#7C3AED"
+}[d] || "#6B7280");
 
 const DestinationDetailPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [dest, setDest] = useState(null);
+  const [packages, setPackages] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [pkgLoading, setPkgLoading] = useState(true);
   const [error, setError] = useState("");
 
   useEffect(() => {
     getDestinationById(id)
       .then(data => { setDest(data); setLoading(false); })
       .catch(err => { setError(err.message); setLoading(false); });
+
+    getPackages()
+      .then(all => {
+        setPackages(all.filter(p => p.destinationId === parseInt(id)));
+        setPkgLoading(false);
+      })
+      .catch(() => setPkgLoading(false));
   }, [id]);
 
   if (loading) return (
@@ -46,7 +60,7 @@ const DestinationDetailPage = () => {
         <div className="absolute bottom-0 left-0 right-0 p-8 max-w-7xl mx-auto">
           <button onClick={() => navigate("/destinations")}
             className="text-white/70 hover:text-white text-sm mb-3 flex items-center gap-1 transition-colors">
-            ← Back to Destinations
+            Back to Destinations
           </button>
           <div className="flex items-end justify-between flex-wrap gap-3">
             <div>
@@ -100,11 +114,51 @@ const DestinationDetailPage = () => {
         <div className="space-y-6">
           <div className="bg-white rounded-2xl p-5 shadow-sm">
             <h2 className="text-base font-bold text-gray-900 mb-4">Available Packages</h2>
-            <p className="text-gray-400 text-sm mb-4">Packages coming soon.</p>
+
+            {pkgLoading ? (
+              <div className="space-y-3">
+                {[1, 2].map(i => (
+                  <div key={i} className="animate-pulse rounded-xl bg-gray-100 h-20" />
+                ))}
+              </div>
+            ) : packages.length === 0 ? (
+              <p className="text-gray-400 text-sm mb-4">No packages available for this destination yet.</p>
+            ) : (
+              <div className="space-y-3 mb-4">
+                {packages.map(pkg => (
+                  <div key={pkg.id}
+                    onClick={() => navigate(`/packages/${pkg.id}`)}
+                    className="group cursor-pointer rounded-xl border border-gray-100 p-3 hover:border-emerald-200 hover:bg-emerald-50/40 transition-all">
+                    <div className="flex items-center gap-3">
+                      <img src={pkg.image} alt={pkg.title}
+                        className="w-12 h-12 rounded-lg object-cover shrink-0" />
+                      <div className="min-w-0">
+                        <p className="text-sm font-semibold text-gray-900 truncate group-hover:text-emerald-700 transition-colors">
+                          {pkg.title}
+                        </p>
+                        <div className="flex items-center gap-2 mt-0.5">
+                          <span className="text-xs text-gray-400">📅 {pkg.duration}d</span>
+                          <span className="text-xs font-semibold px-1.5 py-0.5 rounded-full text-white"
+                            style={{ backgroundColor: difficultyColor(pkg.difficulty), fontSize: "10px" }}>
+                            {pkg.difficulty}
+                          </span>
+                        </div>
+                        <p className="text-xs font-bold mt-0.5" style={{ color: "#10B981" }}>
+                          ${pkg.price?.toLocaleString()} <span className="font-normal text-gray-400">/ person</span>
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
             <button onClick={() => navigate("/packages")}
-              className="w-full text-center text-sm font-semibold py-2 rounded-xl border-2 transition-colors"
-              style={{ borderColor: "#10B981", color: "#10B981" }}>
-              View All Packages
+              className="w-full text-center text-sm font-semibold py-2.5 rounded-xl border-2 transition-all hover:text-white"
+              style={{ borderColor: "#10B981", color: "#10B981" }}
+              onMouseEnter={e => { e.target.style.backgroundColor = "#10B981"; e.target.style.color = "white"; }}
+              onMouseLeave={e => { e.target.style.backgroundColor = "transparent"; e.target.style.color = "#10B981"; }}>
+              View All Packages →
             </button>
           </div>
         </div>
