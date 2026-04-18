@@ -5,28 +5,59 @@ import { register } from "../services/authService";
 const RegisterPage = () => {
   const navigate = useNavigate();
   const [form, setForm] = useState({ name: "", email: "", password: "", confirm: "" });
+  const [nameWarning, setNameWarning] = useState("");
+  const [emailWarning, setEmailWarning] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+
+  const handleNameChange = (e) => {
+    const val = e.target.value;
+    setForm({ ...form, name: val });
+    if (/\d/.test(val)) {
+      setNameWarning("Name should not contain numbers.");
+    } else if (val.trim().length > 0 && !/^[a-zA-Z\s''-]+$/.test(val)) {
+      setNameWarning("Name should only contain letters.");
+    } else {
+      setNameWarning("");
+    }
+  };
+
+  const handleEmailChange = (e) => {
+    const val = e.target.value;
+    setForm({ ...form, email: val });
+    
+    if (val.length > 0 && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)) {
+      setEmailWarning("Enter a valid email (e.g. you@example.com).");
+    } else {
+      setEmailWarning("");
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
 
+    if (!/^[a-zA-Z\s''-]+$/.test(form.name.trim()) || form.name.trim().length < 2) {
+      setError("Name must contain only letters and be at least 2 characters.");
+      return;
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) {
+      setError("Please enter a valid email address.");
+      return;
+    }
     if (form.password !== form.confirm) {
-      setError("Passwords do not match");
+      setError("Passwords do not match.");
       return;
     }
     if (form.password.length < 8) {
-      setError("Password must be at least 8 characters");
+      setError("Password must be at least 8 characters.");
       return;
     }
 
     setLoading(true);
-
     try {
       await register(form.name, form.email, form.password);
       navigate("/home");
-
     } catch (err) {
       setError(err.message === "Failed to fetch"
         ? "Cannot connect to server. Make sure XAMPP is running."
@@ -35,6 +66,8 @@ const RegisterPage = () => {
       setLoading(false);
     }
   };
+
+  const inputStyle = { background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)" };
 
   return (
     <div className="min-h-screen flex items-center justify-center relative overflow-hidden"
@@ -59,32 +92,41 @@ const RegisterPage = () => {
             </div>
           )}
 
+          {/* Full Name */}
           <div className="flex flex-col gap-1">
             <label className="text-white/60 text-[10px] uppercase tracking-wider ml-1">Full Name</label>
             <input
               type="text"
               placeholder="Your name"
               value={form.name}
-              onChange={(e) => setForm({ ...form, name: e.target.value })}
+              onChange={handleNameChange}
               required
               className="rounded-lg px-4 py-2.5 text-white text-sm outline-none focus:ring-2 focus:ring-emerald-500 transition-all"
-              style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)" }}
+              style={inputStyle}
             />
+            {nameWarning && (
+              <p className="text-yellow-400 text-[11px] ml-1 mt-0.5">{nameWarning}</p>
+            )}
           </div>
 
+          {/* Email */}
           <div className="flex flex-col gap-1">
             <label className="text-white/60 text-[10px] uppercase tracking-wider ml-1">Email</label>
             <input
               type="email"
               placeholder="your@email.com"
               value={form.email}
-              onChange={(e) => setForm({ ...form, email: e.target.value })}
+              onChange={handleEmailChange}
               required
               className="rounded-lg px-4 py-2.5 text-white text-sm outline-none focus:ring-2 focus:ring-emerald-500 transition-all"
-              style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)" }}
+              style={inputStyle}
             />
+            {emailWarning && (
+              <p className="text-yellow-400 text-[11px] ml-1 mt-0.5">{emailWarning}</p>
+            )}
           </div>
 
+          {/* Password */}
           <div className="flex flex-col gap-1">
             <label className="text-white/60 text-[10px] uppercase tracking-wider ml-1">Password</label>
             <input
@@ -94,12 +136,13 @@ const RegisterPage = () => {
               onChange={(e) => setForm({ ...form, password: e.target.value })}
               required
               className="rounded-lg px-4 py-2.5 text-white text-sm outline-none focus:ring-2 focus:ring-emerald-500 transition-all"
-              style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)" }}
+              style={inputStyle}
             />
           </div>
 
+          {/* Confirm */}
           <div className="flex flex-col gap-1">
-            <label className="text-white/60 text-[10px] uppercase tracking-wider ml-1">Confirm</label>
+            <label className="text-white/60 text-[10px] uppercase tracking-wider ml-1">Confirm Password</label>
             <input
               type="password"
               placeholder="••••••••"
@@ -107,7 +150,7 @@ const RegisterPage = () => {
               onChange={(e) => setForm({ ...form, confirm: e.target.value })}
               required
               className="rounded-lg px-4 py-2.5 text-white text-sm outline-none focus:ring-2 focus:ring-emerald-500 transition-all"
-              style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)" }}
+              style={inputStyle}
             />
           </div>
 
@@ -116,7 +159,7 @@ const RegisterPage = () => {
             disabled={loading}
             className="mt-2 py-2.5 rounded-lg font-semibold text-white transition-all hover:opacity-90 active:scale-95 text-sm"
             style={{ backgroundColor: "#10B981" }}>
-            {loading ? "Creating account..." : "Register →"}
+            {loading ? "Creating account..." : "Register "}
           </button>
         </form>
 
@@ -126,10 +169,9 @@ const RegisterPage = () => {
             Login
           </Link>
         </p>
-
         <p className="text-center mt-4">
           <Link to="/" className="text-white/30 text-[10px] hover:text-white/50 transition-colors uppercase tracking-widest">
-            ← Back to home
+             Back to home
           </Link>
         </p>
       </div>
