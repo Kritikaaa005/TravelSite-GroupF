@@ -1,3 +1,12 @@
+/**
+ * LandingPage.jsx
+ * Public entry point shown at "/" before login.
+ *
+ * Presents two role cards — Traveler and Admin — that link to
+ * /login?role=user and /login?role=admin respectively.
+ * The role param is read by LoginPage to determine which mode to show.
+ */
+
 import { Link } from "react-router-dom";
 import { User, Shield } from "lucide-react";
 

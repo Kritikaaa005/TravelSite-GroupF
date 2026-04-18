@@ -1,3 +1,14 @@
+/**
+ * HomePage.jsx
+ * Main landing page for logged-in travelers.
+ *
+ * Fetches first 4 destinations and first 3 packages from the backend
+ * and shows them in featured sections. Each section has its own loading
+ * skeleton + error state so one failure doesn't break the whole page.
+ *
+ * Hero search bar navigates to /destinations?search=<query>.
+ */
+
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "@/components/Navbar";
@@ -7,24 +18,30 @@ import { getPackages } from "../services/packageService";
 
 const HomePage = () => {
   const navigate = useNavigate();
+
   const [destinations, setDestinations] = useState([]);
   const [packages, setPackages] = useState([]);
   const [search, setSearch] = useState("");
+
+  // separate loading/error states so sections fail independently
   const [destLoading, setDestLoading] = useState(true);
   const [pkgLoading, setPkgLoading] = useState(true);
   const [destError, setDestError] = useState("");
   const [pkgError, setPkgError] = useState("");
 
   useEffect(() => {
+    // only show first 4 destinations on homepage
     getDestinations()
       .then(d => { setDestinations(d.slice(0, 4)); setDestLoading(false); })
       .catch(err => { setDestError(err.message); setDestLoading(false); });
 
+    // only show first 3 packages on homepage
     getPackages()
       .then(p => { setPackages(p.slice(0, 3)); setPkgLoading(false); })
       .catch(err => { setPkgError(err.message); setPkgLoading(false); });
   }, []);
 
+  // passes the search query to DestinationsListPage via URL param
   const handleSearch = (e) => {
     e.preventDefault();
     navigate(`/destinations?search=${search}`);
@@ -34,10 +51,11 @@ const HomePage = () => {
     <div className="min-h-screen flex flex-col">
       <Navbar />
 
-      {/* Hero */}
+      {/* Hero — full screen background image with search bar on top */}
       <section className="relative h-140 flex items-center justify-center overflow-hidden">
         <div className="absolute inset-0 bg-cover bg-center"
           style={{ backgroundImage: `url('https://images.unsplash.com/photo-1544735716-392fe2489ffa?w=1920&q=80')` }} />
+        {/* dark overlay so text is readable */}
         <div className="absolute inset-0 bg-black/50" />
         <div className="relative z-10 text-center px-6 w-full">
           <h1 className="text-5xl font-extrabold text-white mb-4 leading-tight">
@@ -46,6 +64,7 @@ const HomePage = () => {
           <p className="text-white/70 text-lg mb-8">
             Experience Nepal's breathtaking landscapes and rich culture
           </p>
+          {/* search form — submitting navigates to /destinations with the query */}
           <form onSubmit={handleSearch} className="flex gap-2 max-w-xl mx-auto p-2 bg-white/10 backdrop-blur-md rounded-2xl border border-white/20">
             <div className="flex-1 flex items-center gap-3 bg-white rounded-xl px-4 py-3">
               <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -68,17 +87,19 @@ const HomePage = () => {
         </div>
       </section>
 
-      {/* Featured Destinations */}
+      {/* Featured Destinations — 4 cards in a grid */}
       <section className="py-16 px-6 max-w-7xl mx-auto w-full">
         <div className="text-center mb-10">
           <h2 className="text-3xl font-bold text-gray-900">Featured Destinations</h2>
           <p className="text-gray-500 mt-2">Explore Nepal's most iconic locations</p>
         </div>
 
+        {/* only shows if the fetch failed */}
         {destError && (
           <p className="text-center text-red-400 text-sm mb-6">⚠️ {destError} — make sure XAMPP is running.</p>
         )}
 
+        {/* skeleton placeholders while loading */}
         {destLoading ? (
           <div className="grid grid-cols-4 gap-5">
             {[...Array(4)].map((_, i) => (
@@ -88,11 +109,13 @@ const HomePage = () => {
         ) : (
           <div className="grid grid-cols-4 gap-5">
             {destinations.map(dest => (
+              // whole card is clickable — goes to destination detail
               <div key={dest.id}
                 className="relative rounded-2xl overflow-hidden cursor-pointer group h-64"
                 onClick={() => navigate(`/destinations/${dest.id}`)}>
                 <img src={dest.image} alt={dest.name}
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                {/* gradient so the text at the bottom is readable */}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
                 <div className="absolute bottom-0 left-0 right-0 p-4">
                   <h3 className="text-white font-bold text-lg">{dest.name}</h3>
@@ -108,6 +131,7 @@ const HomePage = () => {
           </div>
         )}
 
+        {/* hover fill done inline — Tailwind can't do dynamic color swaps cleanly */}
         <div className="text-center mt-8">
           <button onClick={() => navigate("/destinations")}
             className="px-6 py-3 rounded-lg border-2 font-semibold text-sm transition-colors hover:text-white"
@@ -119,7 +143,7 @@ const HomePage = () => {
         </div>
       </section>
 
-      {/* Tour Packages */}
+      {/* Tour Packages — 3 cards, slightly different card style from destinations */}
       <section className="py-16 px-6 bg-gray-50">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-10">
@@ -127,10 +151,12 @@ const HomePage = () => {
             <p className="text-gray-500 mt-2">Carefully curated experiences for every adventurer</p>
           </div>
 
+          {/* package fetch error */}
           {pkgError && (
             <p className="text-center text-red-400 text-sm mb-6">⚠️ {pkgError} — make sure XAMPP is running.</p>
           )}
 
+          {/* skeleton cards while packages load */}
           {pkgLoading ? (
             <div className="grid grid-cols-3 gap-6">
               {[...Array(3)].map((_, i) => (
@@ -150,18 +176,21 @@ const HomePage = () => {
                 <div key={pkg.id} className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow">
                   <img src={pkg.image} alt={pkg.title} className="w-full h-48 object-cover" />
                   <div className="p-5">
+                    {/* quick stats row — duration, group size, difficulty */}
                     <div className="flex items-center gap-4 text-gray-400 text-xs mb-3">
                       <span>📅 {pkg.duration} Days</span>
                       <span>👥 Max {pkg.maxPeople} People</span>
                       <span className="ml-auto text-xs px-2 py-1 rounded-full bg-blue-50 text-blue-600">{pkg.difficulty}</span>
                     </div>
                     <h3 className="font-bold text-gray-900 text-lg mb-2">{pkg.title}</h3>
+                    {/* line-clamp-2 keeps card heights consistent */}
                     <p className="text-gray-500 text-sm mb-4 line-clamp-2">{pkg.description}</p>
                     <div className="flex items-center justify-between">
                       <div>
                         <span className="text-2xl font-bold text-gray-900">${pkg.price}</span>
                         <span className="text-gray-400 text-sm"> / person</span>
                       </div>
+                      {/* Book Now goes to package detail page */}
                       <button
                         onClick={() => navigate(`/packages/${pkg.id}`)}
                         className="px-4 py-2 rounded-lg text-sm font-semibold text-white"
