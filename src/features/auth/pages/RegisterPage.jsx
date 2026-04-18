@@ -13,10 +13,18 @@ const RegisterPage = () => {
   const handleNameChange = (e) => {
     const val = e.target.value;
     setForm({ ...form, name: val });
+
+    if (val.length === 0) {
+      setNameWarning("");
+      return;
+    }
+
     if (/\d/.test(val)) {
       setNameWarning("Name should not contain numbers.");
-    } else if (val.trim().length > 0 && !/^[a-zA-Z\s''-]+$/.test(val)) {
-      setNameWarning("Name should only contain letters.");
+    } else if (!/^[a-zA-Z\s-]*$/.test(val)) {
+      setNameWarning("Only letters, spaces, and hyphens allowed.");
+    } else if (val.trim().length < 2) {
+      setNameWarning("Name must be at least 2 characters.");
     } else {
       setNameWarning("");
     }
@@ -25,8 +33,13 @@ const RegisterPage = () => {
   const handleEmailChange = (e) => {
     const val = e.target.value;
     setForm({ ...form, email: val });
-    
-    if (val.length > 0 && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)) {
+
+    if (val.length < 5) {
+      setEmailWarning("");
+      return;
+    }
+
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)) {
       setEmailWarning("Enter a valid email (e.g. you@example.com).");
     } else {
       setEmailWarning("");
@@ -37,53 +50,69 @@ const RegisterPage = () => {
     e.preventDefault();
     setError("");
 
-    if (!/^[a-zA-Z\s''-]+$/.test(form.name.trim()) || form.name.trim().length < 2) {
+    if (!/^[a-zA-Z\s-]+$/.test(form.name.trim()) || form.name.trim().length < 2) {
       setError("Name must contain only letters and be at least 2 characters.");
       return;
     }
+
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) {
       setError("Please enter a valid email address.");
       return;
     }
+
     if (form.password !== form.confirm) {
       setError("Passwords do not match.");
       return;
     }
+
     if (form.password.length < 8) {
       setError("Password must be at least 8 characters.");
       return;
     }
 
     setLoading(true);
+
     try {
       await register(form.name, form.email, form.password);
       navigate("/home");
     } catch (err) {
-      setError(err.message === "Failed to fetch"
-        ? "Cannot connect to server. Make sure XAMPP is running."
-        : err.message
+      setError(
+        err.message === "Failed to fetch"
+          ? "Cannot connect to server. Make sure XAMPP is running."
+          : err.message
       );
       setLoading(false);
     }
   };
 
-  const inputStyle = { background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)" };
+  const inputStyle = {
+    background: "rgba(255,255,255,0.05)",
+    border: "1px solid rgba(255,255,255,0.1)",
+  };
 
   return (
-    <div className="min-h-screen flex items-center justify-center relative overflow-hidden"
-      style={{ backgroundColor: "#0F172A" }}>
-
-      <div className="relative z-10 w-full max-w-sm mx-4 rounded-2xl p-8"
+    <div
+      className="min-h-screen flex items-center justify-center relative overflow-hidden"
+      style={{ backgroundColor: "#0F172A" }}
+    >
+      <div
+        className="relative z-10 w-full max-w-sm mx-4 rounded-2xl p-8"
         style={{
           background: "rgba(255,255,255,0.08)",
           backdropFilter: "blur(16px)",
           WebkitBackdropFilter: "blur(16px)",
           border: "1px solid rgba(255,255,255,0.15)",
-        }}>
-
-        <p className="text-white/60 text-xs mb-4 text-center tracking-widest uppercase">WanderNepal</p>
-        <h1 className="text-2xl font-bold text-white mb-1 text-center">Create Account</h1>
-        <p className="text-white/50 text-xs text-center mb-6">Join WanderNepal today</p>
+        }}
+      >
+        <p className="text-white/60 text-xs mb-4 text-center tracking-widest uppercase">
+          WanderNepal
+        </p>
+        <h1 className="text-2xl font-bold text-white mb-1 text-center">
+          Create Account
+        </h1>
+        <p className="text-white/50 text-xs text-center mb-6">
+          Join WanderNepal today
+        </p>
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-3.5">
           {error && (
@@ -94,7 +123,9 @@ const RegisterPage = () => {
 
           {/* Full Name */}
           <div className="flex flex-col gap-1">
-            <label className="text-white/60 text-[10px] uppercase tracking-wider ml-1">Full Name</label>
+            <label className="text-white/60 text-[10px] uppercase tracking-wider ml-1">
+              Full Name
+            </label>
             <input
               type="text"
               placeholder="Your name"
@@ -105,13 +136,17 @@ const RegisterPage = () => {
               style={inputStyle}
             />
             {nameWarning && (
-              <p className="text-yellow-400 text-[11px] ml-1 mt-0.5">{nameWarning}</p>
+              <p className="text-yellow-400 text-[11px] ml-1 mt-0.5">
+                {nameWarning}
+              </p>
             )}
           </div>
 
           {/* Email */}
           <div className="flex flex-col gap-1">
-            <label className="text-white/60 text-[10px] uppercase tracking-wider ml-1">Email</label>
+            <label className="text-white/60 text-[10px] uppercase tracking-wider ml-1">
+              Email
+            </label>
             <input
               type="email"
               placeholder="your@email.com"
@@ -122,13 +157,17 @@ const RegisterPage = () => {
               style={inputStyle}
             />
             {emailWarning && (
-              <p className="text-yellow-400 text-[11px] ml-1 mt-0.5">{emailWarning}</p>
+              <p className="text-yellow-400 text-[11px] ml-1 mt-0.5">
+                {emailWarning}
+              </p>
             )}
           </div>
 
           {/* Password */}
           <div className="flex flex-col gap-1">
-            <label className="text-white/60 text-[10px] uppercase tracking-wider ml-1">Password</label>
+            <label className="text-white/60 text-[10px] uppercase tracking-wider ml-1">
+              Password
+            </label>
             <input
               type="password"
               placeholder="Min 8 characters"
@@ -142,7 +181,9 @@ const RegisterPage = () => {
 
           {/* Confirm */}
           <div className="flex flex-col gap-1">
-            <label className="text-white/60 text-[10px] uppercase tracking-wider ml-1">Confirm Password</label>
+            <label className="text-white/60 text-[10px] uppercase tracking-wider ml-1">
+              Confirm Password
+            </label>
             <input
               type="password"
               placeholder="••••••••"
@@ -158,8 +199,9 @@ const RegisterPage = () => {
             type="submit"
             disabled={loading}
             className="mt-2 py-2.5 rounded-lg font-semibold text-white transition-all hover:opacity-90 active:scale-95 text-sm"
-            style={{ backgroundColor: "#10B981" }}>
-            {loading ? "Creating account..." : "Register "}
+            style={{ backgroundColor: "#10B981" }}
+          >
+            {loading ? "Creating account..." : "Register"}
           </button>
         </form>
 
@@ -169,9 +211,13 @@ const RegisterPage = () => {
             Login
           </Link>
         </p>
+
         <p className="text-center mt-4">
-          <Link to="/" className="text-white/30 text-[10px] hover:text-white/50 transition-colors uppercase tracking-widest">
-             Back to home
+          <Link
+            to="/"
+            className="text-white/30 text-[10px] hover:text-white/50 transition-colors uppercase tracking-widest"
+          >
+            Back to home
           </Link>
         </p>
       </div>
